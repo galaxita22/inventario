@@ -1,0 +1,165 @@
+.filtro-container {
+  display: flex; gap: 15px; align-items: center; justify-content: center;
+  padding: 15px; padding-block: 20px;
+}
+.contenedor-registros-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); 
+  gap: 25px; margin-top: 25px; padding: 20px;
+}
+
+.registro-card-v2 {
+  background: white; border-radius: 12px; padding: 20px;
+  border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  display: flex; flex-direction: column; justify-content: space-between;
+  transition: transform 0.2s ease; min-height: 220px;
+}
+
+.registro-card-v2:hover { 
+  transform: translateY(-5px); 
+  box-shadow: 0 10px 15px rgba(0,0,0,0.1); 
+}
+
+.registro-header { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: flex-start; 
+  border-bottom: 1px solid #e2e8f0; 
+  padding-bottom: 15px; 
+  margin-bottom: 15px; 
+}
+
+.registro-ticket-id { 
+  font-size: 1.1rem; 
+  color: var(--color-primario); 
+}
+
+.registro-fecha { 
+  font-size: 0.85rem; 
+  color: #64748b; 
+  margin-top: 5px; 
+}
+
+.registro-info p { 
+  margin: 6px 0; 
+  font-size: 0.95rem; 
+  color: #334155; 
+}
+
+.registro-info p strong { 
+  color: #1e293b; 
+}
+
+.btn-ver-detalles {
+  background-color: var(--color-primario); 
+  color: white; 
+  border: none; 
+  border-radius: 6px; 
+  padding: 12px 24px; 
+  font-size: 1rem; 
+  align-self: flex-end; 
+  margin-top: auto; 
+  cursor: pointer;
+}
+
+.badge-devuelto { 
+  background-color: #f1f5f9; 
+  color: #64748b; 
+  padding: 6px 12px; 
+  border-radius: 20px; 
+  font-weight: bold; 
+  font-size: 0.85rem; 
+}
+
+.badge-rechazada { 
+  background-color: #fee2e2; 
+  color: #ef4444; 
+  padding: 6px 12px; 
+  border-radius: 20px; 
+  font-weight: bold; 
+  font-size: 0.85rem; 
+}
+
+.badge-cancelada { 
+  background-color: #fee2e2; 
+  color: #b91c1c; 
+  padding: 6px 12px; 
+  border-radius: 20px; 
+  font-weight: bold; 
+  font-size: 0.85rem; 
+}
+
+.registros-header { 
+  margin-bottom: 20px; 
+  padding: 20px; 
+}
+
+.subtitulo-pagina { 
+  color: #64748b; 
+}
+
+.label-filtro { 
+  font-weight: bold; 
+  color: #475569; 
+}
+
+.select-filtro-registros { 
+  width: 250px; 
+}
+
+.mensaje-vacio-registros { 
+  text-align: center; 
+  padding: 40px; 
+  margin-top: 20px; 
+}
+
+.texto-vacio {
+  color: #64748b; 
+  font-size: 1.1rem; 
+}
+
+.modal-detalle-ticket { 
+  max-width: 500px; 
+}
+
+.titulo-modal-detalle { 
+  color: var(--color-primario); 
+  margin-bottom: 15px; 
+}
+
+.caja-info-usuario { 
+  background: #f8fafc; 
+  padding: 15px; 
+  border-radius: 8px; 
+  margin-bottom: 15px; 
+  font-size: 0.9rem; 
+}
+
+.caja-motivo-rechazo { 
+  background: #fff0ef; 
+  color: var(--estado-critico); 
+  padding: 10px; 
+  border-radius: 6px; 
+  margin-bottom: 15px; 
+  border: 1px solid #f5c2be; 
+}
+.texto-motivo-rechazo { 
+  margin: 0; 
+}
+
+.subtitulo-equipos { 
+  font-size: 1rem; 
+  margin-bottom: 10px; 
+  color: #1e293b; 
+}
+.lista-equipos-detalle { 
+  padding-left: 20px; 
+  margin-bottom: 20px; 
+  color: #475569; 
+}
+.lista-equipos-detalle li { 
+  margin-bottom: 5px; 
+}
+.footer-modal-detalle { 
+  display: flex; 
+  justify-content: flex-end; 
+}

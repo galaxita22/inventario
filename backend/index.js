@@ -1,0 +1,19 @@
+import dotenv from "dotenv";
+import app from "./app.js";
+import sequelize from "./src/database/connection.js";
+dotenv.config();
+
+const PORT = process.env.PORT || 3000;
+
+sequelize.sync()
+    .then(() => {
+        console.log("Conexión a la base de datos establecida y modelos sincronizados");
+        // inicializarCron();
+        app.listen(PORT, () => {
+          console.log(`Servidor corriendo en puerto ${PORT}`);
+        });
+    })
+    .catch((error) => {
+        console.error("Error al conectar a la base de datos:", error);
+    });
+

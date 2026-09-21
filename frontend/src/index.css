@@ -1,0 +1,25 @@
+/* Reemplazo en index.css */
+:root {
+  --color-primario: #0f172a; /* Slate 900 - Sidebar y Botones Principales */
+  --color-secundario: #3b82f6; /* Blue 500 - Detalles y Hover */
+  --bg-pantalla: #f8fafc; /* Fondo general más limpio */
+  --texto-principal: #111827;
+  --texto-secundario: #64748b;
+  --estado-completado: #10b981; /* Verde */
+  --estado-pendiente: #f59e0b; /* Amarillo */
+  --estado-critico: #ef4444; /* Rojo */
+}
+
+.layout-principal {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg-pantalla);
+}
+
+.contenido-derecho {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 32px; /* Más espacio para respirar como en el mockup */
+  overflow-y: auto;
+}
