@@ -59,7 +59,6 @@ DATABASE_URL_CONCHALI="postgresql://postgres:tu_contraseña_local@localhost:5432
 Ejecuta las migraciones o el script de creación de tablas para poblar la estructura en tus bases de datos locales:
 
 ```bash
-# Reemplazar con el comando exacto que use el equipo (ej. npx prisma db push, npm run migrate, etc.)
 npx sequelize-cli db:migrate
 
 ```

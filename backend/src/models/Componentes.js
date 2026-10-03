@@ -12,14 +12,6 @@ const Componentes = sequelize.define("Componentes", {
     allowNull: false,
     unique: true
   },
-  lab_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: "labs",
-        key: "id"
-    }
-  },
   familia: {
     type: DataTypes.STRING,
     allowNull: false

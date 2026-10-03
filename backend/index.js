@@ -7,10 +7,10 @@ const PORT = process.env.PORT || 3000;
 
 sequelize.sync()
     .then(() => {
-        console.log("Conexión a la base de datos establecida y modelos sincronizados");
+        console.log("⋅˚₊‧ 𐙚 ‧₊˚ ⋅ Conexión a la base de datos establecida y modelos sincronizados ⋅˚₊‧ 𐙚 ‧₊˚ ⋅");
         // inicializarCron();
         app.listen(PORT, () => {
-          console.log(`Servidor corriendo en puerto ${PORT}`);
+          console.log(`✩₊˚.⋆☾⋆⁺₊✧ Servidor corriendo en puerto ${PORT} ✩₊˚.⋆☾⋆⁺₊✧`);
         });
     })
     .catch((error) => {
