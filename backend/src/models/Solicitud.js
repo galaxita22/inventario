@@ -1,20 +1,46 @@
 import { DataTypes } from 'sequelize';
+import sequelize from '../database/connection.js';
+import Activo from './Activo.js';
+import Account from './Account.js';
 
-export const Solicitud = (sequelize) => {
-  return sequelize.define('Solicitud', {
-    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    id_solicitante: { type: DataTypes.INTEGER, allowNull: false }, // FK a Usuario (Solicitante)
-    id_aprobador: { type: DataTypes.INTEGER, allowNull: true }, // FK a Usuario (Aprobador) - RF010: Segregación de funciones[cite: 5]
-    id_activo: { type: DataTypes.INTEGER, allowNull: false }, // FK a Activo
-    tipo_operacion: { 
-      type: DataTypes.ENUM('alta', 'traslado', 'devolucion', 'baja'), // RF009: Tipos de operación[cite: 5]
-      allowNull: false 
-    },
-    estado: { 
-      type: DataTypes.ENUM('borrador', 'pendiente', 'devuelta', 'aprobada', 'rechazada'), // RF011: Estados de solicitud[cite: 5]
-      defaultValue: 'borrador'
-    },
-    observaciones: { type: DataTypes.TEXT, allowNull: true }, // RF011: Permitir observaciones[cite: 5]
-    documento_adjunto: { type: DataTypes.STRING, allowNull: true } // Documentos respaldatorios (facturas, guías)[cite: 5]
-  });
-};
+const Solicitud = sequelize.define('Solicitud', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+  },
+  tipo_operacion: {
+    // Ej: 'alta', 'traslado', 'baja', 'devolucion'
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  estado: {
+    // RF011: borrador, pendiente, devuelta, aprobada, rechazada
+    type: DataTypes.ENUM('borrador', 'pendiente', 'devuelta', 'aprobada', 'rechazada'),
+    defaultValue: 'borrador',
+    allowNull: false,
+  },
+  observaciones: {
+    // RF011: Exige ingresar un texto con la observación al rechazar o devolver
+    type: DataTypes.TEXT,
+    allowNull: true,
+  }
+}, {
+  tableName: 'solicitudes',
+  timestamps: true, // Registra fecha de creación y actualización para la bitácora auditable
+});
+
+// Relaciones con el Activo
+Activo.hasMany(Solicitud, { foreignKey: 'activo_id' });
+Solicitud.belongsTo(Activo, { foreignKey: 'activo_id' });
+
+// Relaciones con los Usuarios (RF010: Segregación de funciones)
+// Un usuario solicita:
+Account.hasMany(Solicitud, { as: 'Solicitadas', foreignKey: 'solicitante_id' });
+Solicitud.belongsTo(Account, { as: 'Solicitante', foreignKey: 'solicitante_id' });
+
+// Otro usuario aprueba:
+Account.hasMany(Solicitud, { as: 'Aprobadas', foreignKey: 'aprobador_id' });
+Solicitud.belongsTo(Account, { as: 'Aprobador', foreignKey: 'aprobador_id' });
+
+export default Solicitud;

@@ -9,6 +9,10 @@ import componentRoutes from "./src/routes/componentRoutes.js";
 import prestamoRoutes from "./src/routes/prestamoRoutes.js";
 import detallePrestamoRoutes from "./src/routes/detallePrestamoRoutes.js";
 import alertaRoutes from "./src/routes/alerta.routes.js";
+import establecimientoRoutes from './src/routes/establecimiento.routes.js';
+import ubicacionRoutes from './src/routes/ubicacion.routes.js';
+import activoRoutes from './src/routes/activo.routes.js';
+import solicitudRoutes from './src/routes/solicitud.routes.js';
 
 const app = express();
 
@@ -43,6 +47,10 @@ app.use("/api/component", componentRoutes);
 app.use("/api/prestamo", prestamoRoutes);
 app.use("/api/detalle-prestamo", detallePrestamoRoutes);
 app.use("/api/alertas", alertaRoutes);
+app.use('/api/establecimientos', establecimientoRoutes);
+app.use('/api/ubicaciones', ubicacionRoutes);
+app.use('/api/solicitudes', solicitudRoutes);
+app.use('/api/solicitudes', solicitudRoutes);
 
 app.use((error, _req, res, next) => {
     if (error instanceof multer.MulterError) {

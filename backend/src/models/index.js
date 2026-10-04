@@ -3,6 +3,10 @@ import Componentes from "./Componentes.js";
 import Prestamo from "./Prestamo.js";
 import DetallePrestamo from "./DetallePrestamo.js";
 import Alerta from "./Alerta.js";
+import Ubicacion from "./Ubicacion.js";
+import Establecimiento from "./Establecimiento.js";
+import Activo from "./Activo.js";
+import Solicitud from "./Solicitud.js";
 
 // Relación Usuario - Prestamo (Solicitud) (1:N)
 Prestamo.belongsTo(Account, { foreignKey: 'id_usuario' });
@@ -21,5 +25,9 @@ export {
     Componentes,
     Prestamo,
     DetallePrestamo,
-    Alerta
+    Alerta,
+    Ubicacion,
+    Establecimiento,
+    Activo,
+    Solicitud
 };
