@@ -4,7 +4,6 @@ import jwt from "jsonwebtoken";
 import { Op } from "sequelize";
 import { validarRut, calcularDV } from "../utils/validators.js";
 import crypto from "crypto";
-import { enviarCorreoRegistroUsuario } from "./servicioCorreo.js";
 import fs from "fs";
 import path from "path";
 
@@ -32,8 +31,13 @@ export const registerAccount = async (data) => {
     if (!data.email) {
         throw new Error("El campo correo es obligatorio");
     }
+    
+    // Nueva validación para la contraseña manual
+    if (!data.contrasena) {
+        throw new Error("El campo contraseña es obligatorio");
+    }
 
-    if (!data.rut || !validarRut(data.rut)) {
+    if (!validarRut(data.rut)) {
         throw new Error("El RUT ingresado no es válido. Debe incluir guion (ej: 12345678-9)");
     }
 
@@ -46,20 +50,16 @@ export const registerAccount = async (data) => {
     if (existingRut) {
         throw new Error("El RUT ya se encuentra registrado");
     }
-    const tempPassword = generarPasswordTemporal();
-    const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
+    // Encriptamos la contraseña que el usuario eligió
+    const hashedPassword = await bcrypt.hash(data.contrasena, 10);
+    
     const created = await Account.create({
         ...data,
         contrasena: hashedPassword,
+        role: "solicitante", // Le damos el rol más bajo por defecto por seguridad
         matricula: data.matricula || null
     });
-
-    // Enviar correo de registro (no bloquear el registro si falla)
-    try {
-        await enviarCorreoRegistroUsuario(created, tempPassword);
-    } catch (err) {
-        console.error("Error enviando correo de registro:", err);
-    }
 
     return created;
 };

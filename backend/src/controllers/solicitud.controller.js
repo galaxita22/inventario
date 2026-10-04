@@ -38,7 +38,7 @@ export const obtenerSolicitudes = async (req, res) => {
                 model: Activo,
                 attributes: ['codigo_patrimonial', 'descripcion']
             }]
-            // Si tienes la relación de Account bien armada, luego podemos incluir quién la solicitó
+            // TO DO: Si tienes la relación de Account bien armada, luego podemos incluir quién la solicitó
         });
         res.status(200).json(solicitudes);
     } catch (error) {

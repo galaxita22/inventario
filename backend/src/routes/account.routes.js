@@ -11,7 +11,7 @@ router.get("/sso-callback", controllerAccount.ssoCallback);
 router.put("/change-password/:id", verifyToken, controllerAccount.updatePassword);
 router.get("/:id", verifyToken, controllerAccount.getByID);
 
-router.post("/register", verifyToken, isAdministrador, controllerAccount.register);
+router.post("/register", controllerAccount.register);
 router.put("/:id", verifyToken, isAdministrador, controllerAccount.update);
 router.delete("/:id", verifyToken, isAdministrador, controllerAccount.deleteAccount);
 
