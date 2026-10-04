@@ -1,50 +1,60 @@
-import { Solicitud, Activo } from '../models/index.js';
-// Nota: Asumimos que tienes el modelo Account exportado en tu index.js
+import { Solicitud, Activo, Account } from '../models/index.js';
+import * as solicitudService from '../services/solicitud.service.js';
 
 export const crearSolicitud = async (req, res) => {
     try {
-        const { tipo_operacion, observaciones, activo_id, solicitante_id } = req.body;
-        
-        // Verificar que el activo exista antes de solicitar algo sobre él
+        // 1. Extraemos el ubicacion_destino_id del body
+        const { tipo_operacion, observaciones, activo_id, ubicacion_destino_id } = req.body;
+        const solicitante_id = req.account.id; 
+        const role = req.account.role;
+
         const activoExiste = await Activo.findByPk(activo_id);
-        if (!activoExiste) {
-            return res.status(404).json({ mensaje: "El activo no existe" });
-        }
+        if (!activoExiste) return res.status(404).json({ mensaje: "El activo no existe" });
+
+        const codigo_solicitud = await solicitudService.generarCodigoSolicitud(role, new Date());
 
         const nuevaSolicitud = await Solicitud.create({
+            codigo_solicitud,
             tipo_operacion,
             observaciones,
             activo_id,
+            ubicacion_destino_id, // 2. Lo guardamos en la base de datos
             solicitante_id,
-            estado: 'pendiente' // La ingresamos directamente como pendiente de revisión
+            estado: 'pendiente'
         });
 
-        res.status(201).json({
-            mensaje: "Solicitud registrada con éxito",
-            datos: nuevaSolicitud
-        });
+        res.status(201).json({ mensaje: "Solicitud registrada con éxito", datos: nuevaSolicitud });
     } catch (error) {
-        res.status(500).json({ 
-            mensaje: "Error al crear la solicitud", 
-            error: error.message 
-        });
+        res.status(500).json({ mensaje: "Error al crear la solicitud", error: error.message });
     }
 };
 
-export const obtenerSolicitudes = async (req, res) => {
+// Nueva función: Solo para aprobadores
+export const obtenerSolicitudesPendientes = async (req, res) => {
     try {
         const solicitudes = await Solicitud.findAll({
-            include: [{
-                model: Activo,
-                attributes: ['codigo_patrimonial', 'descripcion']
-            }]
-            // TO DO: Si tienes la relación de Account bien armada, luego podemos incluir quién la solicitó
+            where: { estado: 'pendiente' },
+            include: [
+                { model: Activo, attributes: ['codigo_patrimonial', 'descripcion'] },
+                { model: Account, as: 'Solicitante', attributes: ['nombre_usuario', 'email'] }
+            ]
         });
         res.status(200).json(solicitudes);
     } catch (error) {
-        res.status(500).json({ 
-            mensaje: "Error al obtener las solicitudes", 
-            error: error.message 
-        });
+        res.status(500).json({ mensaje: "Error al obtener las solicitudes", error: error.message });
+    }
+};
+
+// Nueva función: Evaluar la solicitud
+export const evaluarSolicitud = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { estado, observaciones } = req.body;
+        const aprobador_id = req.account.id;
+
+        const actualizada = await solicitudService.procesarAprobacion(id, estado, observaciones, aprobador_id);
+        res.status(200).json({ mensaje: `Solicitud ${estado} con éxito`, datos: actualizada });
+    } catch (error) {
+        res.status(400).json({ mensaje: error.message });
     }
 };

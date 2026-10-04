@@ -26,3 +26,13 @@ export const isAdministrador = (req, res, next) => {
     }
     next();
 };
+
+export const isAprobador = (req, res, next) => {
+    // Definimos quiénes tienen poder de firma en el SLEP
+    const rolesPermitidos = ['aprobador', 'administrador', 'supervisor'];
+    
+    if (!rolesPermitidos.includes(req.account.role)) {
+        return res.status(403).json({ mensaje: "Acceso denegado: Requiere permisos de aprobación" });
+    }
+    next();
+};

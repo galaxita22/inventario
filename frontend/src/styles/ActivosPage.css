@@ -1,0 +1,114 @@
+/* Cabecera y botones principales */
+.activos-header {
+  margin-bottom: 0;
+}
+
+.activos-header h1 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 8px 0;
+}
+
+.activos-header p {
+  color: #64748b;
+  margin: 0;
+}
+
+.btn-primario-accion {
+  background: #3b82f6;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s ease;
+}
+
+.btn-primario-accion:hover {
+  background: #2563eb;
+}
+
+/* Ajustes específicos de la grilla de métricas */
+.activos-metrics {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* Barra de herramientas (Filtros) */
+.activos-toolbar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.activos-filtros-grupo {
+  display: flex;
+  gap: 12px;
+}
+
+.activos-search {
+  width: 250px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+}
+
+.activos-select {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  outline: none;
+  background: white;
+  color: #334155;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+}
+
+.activos-select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* Botón de historial en la tabla */
+.btn-historial {
+  background: transparent;
+  border: none;
+  color: #3b82f6;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.btn-historial:hover {
+  background: #eff6ff;
+}
+
+@media (max-width: 1024px) {
+  .activos-metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .activos-metrics {
+    grid-template-columns: 1fr;
+  }
+  .activos-toolbar {
+    flex-direction: column;
+  }
+  .activos-filtros-grupo {
+    flex-direction: column;
+    width: 100%;
+  }
+  .activos-search, .activos-select {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}

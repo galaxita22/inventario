@@ -1,9 +1,13 @@
 import { Router } from 'express';
-import { crearActivo, obtenerActivos } from '../controllers/activo.controller.js';
+import { obtenerActivos, obtenerHistorialActivo } from '../controllers/activo.controller.js';
+import { verifyToken } from '../middlewares/authJwt.js';
 
 const router = Router();
 
-router.post('/', crearActivo);
-router.get('/', obtenerActivos);
+// GET /api/activos -> Trae todos o filtra si hay query params
+router.get('/', verifyToken, obtenerActivos);
+
+// GET /api/activos/:id/historial -> Trae la línea de tiempo del activo
+router.get('/:id/historial', verifyToken, obtenerHistorialActivo);
 
 export default router;

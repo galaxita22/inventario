@@ -65,21 +65,20 @@ export const registerAccount = async (data) => {
 };
 
 export const loginAccount = async (email, contrasena) => {
-
-    // Permitir admin@admin.com para administradores, o validar dominio Utalca para otros
-    const isAdmin = email.toLowerCase() === 'admin@admin.com';
-    if (!isAdmin && !validarCorreoUtalca(email)) {
-        throw new Error("Correo o contraseña incorrecto");
-    }
-
     const account = await Account.findOne({ where: { email } });
-    if (!account) throw new Error("Correo o contraseña incorrecto");
+    if (!account) throw new Error("Correo o contraseña incorrectos");
 
     const isPasswordValid = await bcrypt.compare(contrasena, account.contrasena);
-    if (!isPasswordValid) throw new Error("Correo o contraseña incorrecto");
+    if (!isPasswordValid) throw new Error("Correo o contraseña incorrectos");
 
-    const payload = { id: account.id, email: account.email, nombre_usuario: account.nombre_usuario, role: account.role, first_login: account.first_login };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "15m" });
+    const payload = { 
+        id: account.id, 
+        email: account.email, 
+        nombre_usuario: account.nombre_usuario, 
+        role: account.role 
+    };
+    
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "24h" });
 
     return { token, account };
 };
@@ -110,7 +109,7 @@ export const renewToken = async (token) => {
         first_login: account.first_login
     };
 
-    const newToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "15m" });
+    const newToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "24h" });
 
     const accountData = account.toJSON();
     delete accountData.contrasena;
@@ -223,7 +222,7 @@ export const loginSSO = async (rut) => {
         first_login: account.first_login
     };
 
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "15m" });
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "24h" });
 
     return { token, account };
 }
