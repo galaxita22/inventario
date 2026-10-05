@@ -1,5 +1,5 @@
 import sequelize from "./src/database/connection.js";
-import { Lab, Componentes, Prestamo, Alerta, Account } from "./src/models/index.js";
+import { Account } from "./src/models/index.js";
 
 const poblarBaseDeDatos = async () => {
   try {
@@ -90,4 +90,4 @@ const poblarBaseDeDatos = async () => {
   }
 };
 
-poblarBaseDeDatos();
+BaseDeDatos();
