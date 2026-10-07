@@ -12,12 +12,7 @@ body {
 }
 
 /* Forzar que el layout ocupe exactamente el 100% de la ventana */
-.layout-principal {
-  display: flex;
-  height: 100vh;
-  width: 100vw;
-  background-color: #f8fafc;
-}
+
 
 /* El contenido derecho debe expandirse y tener su propio scroll */
 .contenido-derecho {

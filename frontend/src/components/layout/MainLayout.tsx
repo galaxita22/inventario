@@ -1,6 +1,6 @@
 import { Outlet, useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar'; // Asegúrate de crear/mover Sidebar a esta misma carpeta
-
+import './MainLayout.css'; // Asegúrate de crear este archivo CSS para estilos específicos del layout
 interface MainLayoutProps {
   auth: { isLoggedIn: boolean; userRole: string | null };
   setAuth: React.Dispatch<React.SetStateAction<{ isLoggedIn: boolean; userRole: string | null }>>;

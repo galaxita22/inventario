@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Search, Plus, Edit, Trash2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Search, Plus, Edit, Trash2, Eye } from 'lucide-react';
 import { type Activo } from '../../types/Activo';
+import ModalNuevoActivo from '../../components/specific/ModalNuevoActivo';
 import './ActivosPage.css';
 
 export default function ActivosPage() {
@@ -8,7 +10,8 @@ export default function ActivosPage() {
   const [cargando, setCargando] = useState(true);
   const [busqueda, setBusqueda] = useState('');
   const [error, setError] = useState('');
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
   useEffect(() => {
@@ -46,7 +49,7 @@ export default function ActivosPage() {
           <h1>Patrimonio Institucional</h1>
           <p>Gestión centralizada de bienes muebles y activos fijos del SLEP</p>
         </div>
-        <button className="btn-primario" onClick={() => alert('Modal de nuevo activo en construcción')}>
+        <button className="btn-primario" onClick={() => setIsModalOpen(true)}>
           <Plus size={20} />
           Registrar Activo
         </button>
@@ -104,13 +107,24 @@ export default function ActivosPage() {
                       {activo.estado_conservacion}
                     </span>
                   </td>
-                  <td style={{ textAlign: 'center' }}>
-                    <button className="btn-accion" title="Editar Activo">
-                      <Edit size={18} />
-                    </button>
-                    <button className="btn-accion" title="Dar de Baja" style={{ color: '#ef4444' }}>
-                      <Trash2 size={18} />
-                    </button>
+                  
+                  {/* COLUMNA DE ACCIONES (El ojito, editar y eliminar) */}
+                  <td>
+                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                      <button 
+                        className="btn-accion" 
+                        title="Ver Ficha" 
+                        onClick={() => navigate(`/activos/${activo.id}`)}
+                      >
+                        <Eye size={18} color="#3b82f6" />
+                      </button>
+                      <button className="btn-accion" title="Editar Activo">
+                        <Edit size={18} />
+                      </button>
+                      <button className="btn-accion" title="Dar de Baja" style={{ color: '#ef4444' }}>
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -118,6 +132,13 @@ export default function ActivosPage() {
           </tbody>
         </table>
       </div>
+    <ModalNuevoActivo 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onSuccess={() => {
+          window.location.reload(); 
+        }} 
+      />
     </div>
   );
 }
