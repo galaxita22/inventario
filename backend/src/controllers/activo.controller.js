@@ -1,4 +1,4 @@
-import { Activo, Ubicacion, Solicitud, Account } from '../models/index.js';
+import { Activo, Ubicacion, Establecimiento, Solicitud, Account } from '../models/index.js'; // <-- Agregamos Establecimiento aquí
 
 export const crearActivo = async (req, res) => {
     try {
@@ -24,7 +24,6 @@ export const crearActivo = async (req, res) => {
             datos: nuevoActivo
         });
     } catch (error) {
-        // Manejo específico si el código patrimonial ya existe (es UNIQUE en el modelo)
         if (error.name === 'SequelizeUniqueConstraintError') {
             return res.status(400).json({ mensaje: "El código patrimonial ya está en uso" });
         }
@@ -37,10 +36,8 @@ export const crearActivo = async (req, res) => {
 
 export const obtenerActivos = async (req, res) => {
     try {
-        // Extraemos los filtros de la URL (Query Params)
         const { ubicacion_id, estado_conservacion } = req.query;
         
-        // Armamos un objeto dinámico. Si no hay filtros, trae todo.
         const whereClause = {};
         if (ubicacion_id) whereClause.ubicacion_id = ubicacion_id;
         if (estado_conservacion) whereClause.estado_conservacion = estado_conservacion;
@@ -56,6 +53,25 @@ export const obtenerActivos = async (req, res) => {
     }
 };
 
+// --- NUEVA FUNCIÓN AGREGADA AQUÍ ---
+export const obtenerActivoPorId = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const activo = await Activo.findByPk(id, {
+            include: [{ 
+                model: Ubicacion, 
+                as: 'Ubicacion',
+                include: [{ model: Establecimiento, attributes: ['nombre', 'rbd'] }]
+            }]
+        });
+        
+        if (!activo) return res.status(404).json({ mensaje: "Activo no encontrado" });
+        res.status(200).json(activo);
+    } catch (error) {
+        res.status(500).json({ mensaje: "Error al cargar la ficha del activo", error: error.message });
+    }
+};
+
 export const obtenerHistorialActivo = async (req, res) => {
     try {
         const { id } = req.params;
@@ -66,7 +82,6 @@ export const obtenerHistorialActivo = async (req, res) => {
         
         if (!activo) return res.status(404).json({ mensaje: "Activo no encontrado" });
 
-        // Buscamos todas las solicitudes aprobadas para este equipo, ordenadas de la más nueva a la más vieja
         const historial = await Solicitud.findAll({
             where: { activo_id: id, estado: 'aprobada' },
             order: [['updatedAt', 'DESC']],

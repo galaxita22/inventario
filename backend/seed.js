@@ -1,87 +1,105 @@
+import bcrypt from "bcryptjs";
 import sequelize from "./src/database/connection.js";
-import { Account } from "./src/models/index.js";
+import { Account, Establecimiento, Ubicacion, Activo, Solicitud } from "./src/models/index.js";
 
 const poblarBaseDeDatos = async () => {
   try {
     console.log("⏳ Conectando a la base de datos...");
     await sequelize.authenticate();
     
-    console.log("🔨 Limpiando restricciones y tipos antiguos...");
-    await sequelize.query('ALTER TABLE prestamos DROP CONSTRAINT IF EXISTS prestamos_estado_check;');
-    
-    // Eliminamos la columna por completo para evadir el bug de Sequelize con los ENUMs
-    await sequelize.query('ALTER TABLE accounts DROP COLUMN IF EXISTS role;');
-    await sequelize.query('DROP TYPE IF EXISTS enum_accounts_role CASCADE;');
-    await sequelize.query('DROP TYPE IF EXISTS user_role CASCADE;');
+    console.log("🔨 Reconstruyendo la base de datos desde cero (force: true)...");
+    // force: true destruye las tablas existentes y las recrea limpias con los nuevos modelos
+    await sequelize.sync({ force: true });
 
-    // Sincronizamos. Sequelize creará la columna "role" desde cero con la configuración perfecta.
-    await sequelize.sync({ alter: true });
+    console.log("👤 Creando usuarios base...");
+    const contrasenaHash = await bcrypt.hash('123456', 10);
 
-    console.log("🔍 Buscando usuario admin...");
-    const admin = await Account.findOne({ where: { email: 'admin@loslibertadores.cl' } });
-    
-    if (!admin) {
-      console.log("❌ Error: No se encontró al admin. Inicia el backend y regístralo primero.");
-      process.exit(1);
+    const usuariosBase = [
+      {
+        rut: '20008999-5',
+        nombre_usuario: 'Administrador Sistema',
+        email: 'admin@slep.cl',
+        contrasena: contrasenaHash,
+        role: 'administrador',
+        first_login: false
+      },
+      {
+        rut: '8180530-k',
+        nombre_usuario: 'Aprobador Director',
+        email: 'aprobador@slep.cl',
+        contrasena: contrasenaHash,
+        role: 'aprobador',
+        first_login: false
+      },
+      {
+        rut: '19904761-2',
+        nombre_usuario: 'Solicitante Docente',
+        email: 'solicitante@slep.cl',
+        contrasena: contrasenaHash,
+        role: 'solicitante',
+        first_login: false
+      }
+    ];
+
+    for (const user of usuariosBase) {
+      await Account.create(user);
     }
 
-    // Restauramos el rol del admin (ya que al recrear la columna quedó con el valor por defecto)
-    admin.role = 'aprobador'; 
-    await admin.save();
+    console.log("🏫 Creando Establecimientos y Ubicaciones...");
+    const colegio = await Establecimiento.create({
+      rbd: '12345-6',
+      nombre: 'Liceo Bicentenario Quilicura',
+      direccion: 'Av. Las Torres 123',
+      tipo: 'Liceo'
+    });
 
-    console.log("📦 Insertando Bodega inicial...");
-    const [bodega] = await Lab.findOrCreate({
-      where: { nombre: 'Bodega Central Quilicura' },
-      defaults: { edificio: 'Sede Principal' }
+    const bodega = await Ubicacion.create({
+      nombre: 'Bodega Central',
+      dependencia: 'Administración',
+      centro_costo: 'CC-001',
+      establecimiento_id: colegio.id
+    });
+
+    const salaComputacion = await Ubicacion.create({
+      nombre: 'Sala de Computación 1',
+      dependencia: 'Pabellón A',
+      centro_costo: 'CC-002',
+      establecimiento_id: colegio.id
     });
 
     console.log("💻 Insertando Activos Fijos...");
     const activos = [
-      { sku: 'IT-001', familia: 'Computadores', modelo: 'Laptop Dell XPS 15', tipo: 'Hardware', cantidad: 25, stock_critico: 5, lab_id: bodega.id },
-      { sku: 'IT-002', familia: 'Periféricos', modelo: 'Monitor Samsung 27"', tipo: 'Hardware', cantidad: 3, stock_critico: 5, lab_id: bodega.id },
-      { sku: 'IT-003', familia: 'Impresoras', modelo: 'Impresora HP LaserJet', tipo: 'Hardware', cantidad: 1, stock_critico: 2, lab_id: bodega.id },
-      { sku: 'IT-004', familia: 'Periféricos', modelo: 'Teclado Mecánico', tipo: 'Hardware', cantidad: 15, stock_critico: 5, lab_id: bodega.id },
-      { sku: 'MOB-001', familia: 'Mobiliario', modelo: 'Silla Ergonómica', tipo: 'Mueble', cantidad: 12, stock_critico: 4, lab_id: bodega.id }
+      { 
+        codigo_patrimonial: 'INV-2026-001', 
+        descripcion: 'Laptop Dell XPS 15', 
+        categoria: 'Hardware', 
+        estado_conservacion: 'nuevo', 
+        valor: 850000, 
+        ubicacion_id: bodega.id 
+      },
+      { 
+        codigo_patrimonial: 'INV-2026-002', 
+        descripcion: 'Monitor Samsung 27"', 
+        categoria: 'Periféricos', 
+        estado_conservacion: 'bueno', 
+        valor: 150000, 
+        ubicacion_id: salaComputacion.id 
+      },
+      { 
+        codigo_patrimonial: 'INV-2026-003', 
+        descripcion: 'Proyector Epson X100', 
+        categoria: 'Audiovisual', 
+        estado_conservacion: 'regular', 
+        valor: 320000, 
+        ubicacion_id: bodega.id 
+      }
     ];
 
     for (const activo of activos) {
-      await Componentes.findOrCreate({
-        where: { modelo: activo.modelo },
-        defaults: activo
-      });
+      await Activo.create(activo);
     }
 
-    console.log("⚠️ Insertando Alertas del sistema...");
-    const alertas = [
-      { titulo: 'Mantenimiento Vencido (CRÍTICO)', mensaje: 'Impresora HP LaserJet', creada_por: admin.id },
-      { titulo: 'Stock Bajo (ADVERTENCIA)', mensaje: 'Monitor Samsung 27" - Quedan 3 unidades', creada_por: admin.id },
-      { titulo: 'Garantía próxima a vencer (CRÍTICO)', mensaje: 'Laptop Dell XPS 15', creada_por: admin.id }
-    ];
-
-    for (const alerta of alertas) {
-      await Alerta.findOrCreate({
-        where: { titulo: alerta.titulo },
-        defaults: alerta
-      });
-    }
-
-    console.log("📝 Insertando Solicitudes con los nuevos estados...");
-    const nuevosEstados = [
-      'ejecutada', 
-      'pendiente de aprobación', 
-      'devuelta para corrección', 
-      'aprobada', 
-      'borrador'
-    ];
-    
-    for (const estado of nuevosEstados) {
-      await Prestamo.create({
-        estado: estado,
-        id_usuario: admin.id
-      });
-    }
-
-    console.log("✅ ¡Datos base inyectados correctamente con el nuevo formato!");
+    console.log("✅ ¡Base de datos poblada con éxito para el SLEP!");
     process.exit(0);
 
   } catch (error) {
@@ -90,4 +108,5 @@ const poblarBaseDeDatos = async () => {
   }
 };
 
-BaseDeDatos();
+// Llamada correcta a la función
+poblarBaseDeDatos();

@@ -14,7 +14,8 @@ const app = express();
 
 const allowedOrigins = [
     process.env.FRONTEND_URL, 
-    "http://localhost:8081", 
+   "http://192.168.1.97:8080",
+    "http://localhost:8080", 
     "http://localhost:5173",
     "http://192.168.0.13:8081" 
 ].filter(Boolean);
