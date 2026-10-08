@@ -8,7 +8,8 @@ const router = Router();
 router.post('/', verifyToken, crearSolicitud);
 
 // Aprobaciones (Solo roles autorizados)
-router.get('/pendientes', verifyToken, isAprobador, obtenerSolicitudesPendientes);
-router.put('/:id/evaluar', verifyToken, isAprobador, evaluarSolicitud); // Ruta blindada
+// Aprobaciones (Solo roles autorizados)
+router.get('/api/solicitudes', verifyToken, isAprobador, obtenerSolicitudesPendientes);
+router.put('/api/solicitudes/:id/evaluar', verifyToken, isAprobador, evaluarSolicitud); // Ruta blindada
 
 export default router;
