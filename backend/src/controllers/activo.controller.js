@@ -1,4 +1,4 @@
-import { Activo, Ubicacion, Establecimiento, Solicitud, Account } from '../models/index.js'; // <-- Agregamos Establecimiento aquí
+import { Activo, Ubicacion, Establecimiento, Solicitud, Account, Documento } from '../models/index.js'; // <-- Agregamos Establecimiento aquí
 
 export const crearActivo = async (req, res) => {
     try {
@@ -62,7 +62,12 @@ export const obtenerActivoPorId = async (req, res) => {
                 model: Ubicacion, 
                 as: 'Ubicacion',
                 include: [{ model: Establecimiento, attributes: ['nombre', 'rbd'] }]
-            }]
+            },
+	   {
+	        model: Documento,
+		as: 'Documentos'
+	    }
+	]
         });
         
         if (!activo) return res.status(404).json({ mensaje: "Activo no encontrado" });
@@ -98,5 +103,25 @@ export const obtenerHistorialActivo = async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({ mensaje: "Error al obtener el historial", error: error.message });
+    }
+};
+export const subirDocumento = async (req, res) => {
+    try {
+        const { id } = req.params; // ID del activo
+        
+        if (!req.file) {
+            return res.status(400).json({ mensaje: "No se adjuntó ningún archivo" });
+        }
+
+        const nuevoDoc = await Documento.create({
+            nombre_original: req.file.originalname,
+            url_archivo: `/uploads/documentos/${req.file.filename}`,
+            tipo_mime: req.file.mimetype,
+            activo_id: id
+        });
+
+        res.status(201).json({ mensaje: "Documento subido con éxito", documento: nuevoDoc });
+    } catch (error) {
+        res.status(500).json({ mensaje: "Error al subir el documento", error: error.message });
     }
 };

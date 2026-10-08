@@ -3,32 +3,27 @@ import * as solicitudService from '../services/solicitud.service.js';
 
 export const crearSolicitud = async (req, res) => {
     try {
-        // 1. Extraemos el ubicacion_destino_id del body
-        const { tipo_operacion, observaciones, activo_id, ubicacion_destino_id } = req.body;
-        const solicitante_id = req.account.id; 
-        const role = req.account.role;
+        const { activo_id, tipo_operacion, justificacion } = req.body;
+        const account_id = req.userId; // Esto lo inyecta tu middleware verifyToken
 
-        const activoExiste = await Activo.findByPk(activo_id);
-        if (!activoExiste) return res.status(404).json({ mensaje: "El activo no existe" });
-
-        const codigo_solicitud = await solicitudService.generarCodigoSolicitud(role, new Date());
+        // Generamos un código de solicitud automático (ej: MOV-123456)
+        const codigo_solicitud = `MOV-${Date.now().toString().slice(-6)}`;
 
         const nuevaSolicitud = await Solicitud.create({
             codigo_solicitud,
-            tipo_operacion,
-            observaciones,
             activo_id,
-            ubicacion_destino_id, // 2. Lo guardamos en la base de datos
-            solicitante_id,
-            estado: 'pendiente'
+            account_id,
+            tipo_operacion, // 'asignacion', 'baja', 'devolucion', etc.
+            estado: 'Pendiente',
+            justificacion
         });
 
-        res.status(201).json({ mensaje: "Solicitud registrada con éxito", datos: nuevaSolicitud });
+        res.status(201).json({ mensaje: "Solicitud creada exitosamente", solicitud: nuevaSolicitud });
     } catch (error) {
+        console.error("🚨 Error al crear solicitud:", error);
         res.status(500).json({ mensaje: "Error al crear la solicitud", error: error.message });
     }
 };
-
 // Nueva función: Solo para aprobadores
 export const obtenerSolicitudesPendientes = async (req, res) => {
     try {
