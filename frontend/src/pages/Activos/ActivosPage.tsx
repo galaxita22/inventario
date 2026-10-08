@@ -13,7 +13,18 @@ export default function ActivosPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
-
+  const [filtroUbicacion, setFiltroUbicacion] = useState('');
+const ubicacionesMap = new Map();
+  activos.forEach((activo: any) => {
+    if (activo.ubicacion_id) {
+      // Intenta leer el nombre (depende de cómo se llame el campo en tu BD, suele ser 'nombre' o 'descripcion')
+      const nombreMostrar = activo.Ubicacion?.nombre || activo.Ubicacion?.descripcion || `Ubicación ID: ${activo.ubicacion_id}`;
+      
+      if (!ubicacionesMap.has(activo.ubicacion_id)) {
+        ubicacionesMap.set(activo.ubicacion_id, nombreMostrar);
+      }
+    }
+  });
   useEffect(() => {
     const fetchActivos = async () => {
       try {
@@ -35,12 +46,22 @@ export default function ActivosPage() {
 
     fetchActivos();
   }, [BACKEND_URL]);
-
+  const ubicacionesUnicas = Array.from(ubicacionesMap.entries());
   // Filtrado dinámico por código patrimonial o descripción
-  const activosFiltrados = activos.filter(activo => 
-    activo.codigo_patrimonial.toLowerCase().includes(busqueda.toLowerCase()) ||
-    activo.descripcion.toLowerCase().includes(busqueda.toLowerCase())
-  );
+  const activosFiltrados = activos.filter((activo: any) => {
+    const textoBusqueda = busqueda.toLowerCase();
+    
+    // Verifica si coincide con el texto (búsqueda normal)
+    const coincideBusqueda = 
+      activo.codigo_patrimonial?.toLowerCase().includes(textoBusqueda) || 
+      activo.descripcion?.toLowerCase().includes(textoBusqueda);
+      
+    // Verifica si coincide con el filtro del <select> (si está vacío, muestra todos)
+    const coincideUbicacion = filtroUbicacion === '' || activo.ubicacion_id?.toString() === filtroUbicacion;
+
+    // Solo muestra el activo si cumple AMBAS condiciones
+    return coincideBusqueda && coincideUbicacion;
+  });
 
   return (
     <div className="activos-container">
@@ -56,15 +77,48 @@ export default function ActivosPage() {
       </div>
 
       <div className="activos-toolbar">
-        <div className="search-box">
-          <Search size={20} color="#94a3b8" />
+        {/* Contenedor de Búsqueda y Filtros */}
+      <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
+        
+        {/* Barra de Búsqueda */}
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', background: 'white', padding: '12px 16px', borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+          <Search size={20} color="#64748b" style={{ marginRight: '8px' }} />
           <input 
             type="text" 
             placeholder="Buscar por código patrimonial o descripción..." 
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
+            style={{ border: 'none', outline: 'none', width: '100%', fontSize: '0.95rem' }} 
           />
         </div>
+
+        {/* NUEVO: Filtro de Ubicación */}
+        {/* Filtro de Ubicación Mejorado */}
+        <select 
+          value={filtroUbicacion} 
+          onChange={(e) => setFiltroUbicacion(e.target.value)}
+          style={{ 
+            padding: '12px 16px', 
+            borderRadius: '8px', 
+            border: '1px solid #e2e8f0', 
+            background: 'white', 
+            color: '#334155', 
+            fontSize: '0.95rem', 
+            outline: 'none', 
+            cursor: 'pointer', 
+            boxShadow: '0 1px 2px rgba(0,0,0,0.05)', 
+            minWidth: '220px' 
+          }}
+        >
+          <option value="">Todas las ubicaciones</option>
+          {ubicacionesUnicas.map(([id, nombre]) => (
+            <option key={id as string} value={id as string}>
+              {nombre as string}
+            </option>
+          ))}
+        </select>
+        
+      </div>
       </div>
 
       {error && <p style={{ color: '#ef4444', fontWeight: 600 }}>{error}</p>}

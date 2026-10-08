@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, Bell, Package, AlertTriangle, Clock, TrendingUp, Filter } from 'lucide-react';
 import './DashboardPage.css';
+import api from '../../services/api';
 
 interface Activo {
   id: number;
@@ -36,7 +37,7 @@ export default function DashboardPage() {
         const token = localStorage.getItem('token');
         const headers = { 'Authorization': `Bearer ${token}` };
 
-        // Peticiones concurrentes a tu backend
+        // Peticiones concurrentes a backend
         const [resActivos, resSolicitudes] = await Promise.all([
           fetch(`${BACKEND_URL}/api/activos`, { headers }),
           fetch(`${BACKEND_URL}/api/solicitudes`, { headers }) // O el endpoint que traiga los movimientos
@@ -53,7 +54,20 @@ export default function DashboardPage() {
     };
     cargarDatos();
   }, []);
-
+  
+  const evaluarSolicitud = async (id: number, nuevoEstado: string) => {
+    try {
+      // Usamos exactamente tu ruta: /:id/evaluar
+      await api.put(`/api/solicitudes/${id}/evaluar`, { estado: nuevoEstado });
+      
+      // Actualizamos la tabla localmente para que el cambio se vea al instante
+      setSolicitudes((prev: any[]) => 
+        prev.map(sol => sol.id === id ? { ...sol, estado: nuevoEstado } : sol)
+      );
+    } catch (error: any) {
+      alert(error.response?.data?.mensaje || 'Error al evaluar la solicitud');
+    }
+  };
   // Cálculos de métricas
   const totalActivos = activos.length;
   const stockCritico = activos.filter(a => a.estado_conservacion === 'malo' || a.estado_conservacion === 'obsoleto').length;
@@ -126,7 +140,7 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* Grilla Principal */}
+      {/* Grill Principal */}
       <div className="dashboard-main-grid">
         {/* Tabla de Movimientos */}
         <section className="dashboard-section">
@@ -148,13 +162,14 @@ export default function DashboardPage() {
                 <th>Tipo Movimiento</th>
                 <th>Responsable</th>
                 <th>Estado</th>
+                <th>Acciones</th> {/* <-- NUEVO ENCABEZADO */}
               </tr>
             </thead>
             <tbody>
               {cargando ? (
-                <tr><td colSpan={5} style={{textAlign: 'center'}}>Cargando datos...</td></tr>
+                <tr><td colSpan={6} style={{textAlign: 'center'}}>Cargando datos...</td></tr>
               ) : solicitudes.length === 0 ? (
-                <tr><td colSpan={5} style={{textAlign: 'center'}}>No hay movimientos registrados</td></tr>
+                <tr><td colSpan={6} style={{textAlign: 'center'}}>No hay movimientos registrados</td></tr>
               ) : (
                 solicitudes.slice(0, 5).map((sol) => (
                   <tr key={sol.id}>
@@ -163,10 +178,40 @@ export default function DashboardPage() {
                     <td style={{ textTransform: 'capitalize' }}>{sol.tipo_operacion}</td>
                     <td>{sol.Solicitante?.nombre_usuario || 'Sistema'}</td>
                     <td>
-                      <span className={`status-badge ${sol.estado.toLowerCase()}`}>
-                        {sol.estado.toUpperCase()}
+                      <span className={`status-badge ${sol.estado?.toLowerCase()}`}>
+                        {sol.estado?.toUpperCase()}
                       </span>
                     </td>
+                    
+                    {/* 👇 AQUÍ ESTÁ INTEGRADO TU BLOQUE DE BOTONES 👇 */}
+                    <td style={{ display: 'flex', gap: '8px' }}>
+                      {sol.estado?.toLowerCase() === 'pendiente' ? (
+                        <>
+                          <button 
+                            className="btn-primario" 
+                            style={{ backgroundColor: '#22c55e', borderColor: '#22c55e', padding: '6px 12px', fontSize: '0.85rem' }}
+                            onClick={() => evaluarSolicitud(sol.id, 'aprobada')}
+                          >
+                            Aprobar
+                          </button>
+                          <button 
+                            className="btn-secundario" 
+                            style={{ color: '#ef4444', borderColor: '#ef4444', padding: '6px 12px', fontSize: '0.85rem' }}
+                            onClick={() => evaluarSolicitud(sol.id, 'rechazada')}
+                          >
+                            Rechazar
+                          </button>
+                        </>
+                      ) : (
+                        <span style={{ 
+                          fontWeight: 'bold', 
+                          color: sol.estado?.toLowerCase() === 'aprobada' ? '#22c55e' : '#ef4444' 
+                        }}>
+                          {sol.estado?.toUpperCase()}
+                        </span>
+                      )}
+                    </td>
+                    {/* 👆 FIN DEL BLOQUE 👆 */}
                   </tr>
                 ))
               )}
