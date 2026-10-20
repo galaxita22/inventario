@@ -29,7 +29,7 @@ export default function DashboardPage() {
   const userRaw = localStorage.getItem('user');
   const usuarioActual = userRaw ? JSON.parse(userRaw) : null;
   
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || '';
 
   useEffect(() => {
     const cargarDatos = async () => {
