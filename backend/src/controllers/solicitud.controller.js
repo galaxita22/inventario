@@ -2,13 +2,13 @@ import { Solicitud, Activo, Account } from '../models/index.js';
 import * as solicitudService from '../services/solicitud.service.js';
 
 export const crearSolicitud = async (req, res) => {
-    try {
+try {
+        // 1. Recibimos los datos exactos que manda el frontend
         const { activo_id, tipo_operacion, justificacion, ubicacion_destino_id } = req.body;
         
-        // Cubrimos las formas más comunes en las que verifyToken inyecta el ID
-        const account_id = req.userId || req.user?.id || req.usuarioId; 
-
-        if (!activo_id) return res.status(400).json({ mensaje: "Debes seleccionar un activo." });
+        // 2. Extraemos el ID del usuario de forma segura desde el token
+        const account_id = req.account?.id;
+	if (!activo_id) return res.status(400).json({ mensaje: "Debes seleccionar un activo." });
         if (!account_id) return res.status(400).json({ mensaje: "Error de sesión: No se detectó el ID del usuario." });
 
         const codigo_solicitud = `MOV-${Date.now().toString().slice(-6)}`;
@@ -34,28 +34,19 @@ export const crearSolicitud = async (req, res) => {
 export const obtenerSolicitudesPendientes = async (req, res) => {
     try {
         const solicitudes = await Solicitud.findAll({
-            // Si quieres ver también el historial de las aprobadas/rechazadas en la tabla, borra la línea del "where"
-            // where: { estado: 'pendiente' }, 
+            where: { estado: 'pendiente' },
             include: [
-                { 
-                    model: Activo,
-                    as: 'Activo', // Asegúrate de que coincida con el alias en models/index.js
-                    attributes: ['id', 'codigo_patrimonial', 'descripcion'] 
-                },
-                { 
-                    model: Account, 
-                    as: 'Solicitante', // Como le pusiste 'Solicitante' de alias, lo usaremos así en el front
-                    attributes: ['id', 'nombre_usuario', 'email'] // <-- EL 'id' AQUÍ ES CLAVE PARA LA SEGURIDAD
-                }
-            ],
-            order: [['createdAt', 'DESC']]
+                { model: Activo, attributes: ['codigo_patrimonial', 'descripcion'] },
+                // ¡AQUÍ FALTABA TRAER EL ID DEL USUARIO!
+                { model: Account, as: 'Solicitante', attributes: ['id', 'nombre_usuario', 'email'] }
+            ]
         });
         res.status(200).json(solicitudes);
     } catch (error) {
-        console.error("🚨 Error al obtener solicitudes:", error);
         res.status(500).json({ mensaje: "Error al obtener las solicitudes", error: error.message });
     }
 };
+
 // Nueva función: Evaluar la solicitud
 export const evaluarSolicitud = async (req, res) => {
     try {
