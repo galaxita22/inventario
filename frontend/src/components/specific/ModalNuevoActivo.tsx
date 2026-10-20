@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
 import './ModalNuevoActivo.css';
@@ -19,7 +18,6 @@ export default function ModalNuevoActivo({ isOpen, onClose, onSuccess }: ModalPr
   const [ubicaciones, setUbicaciones] = useState<Ubicacion[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     codigo_patrimonial: '',

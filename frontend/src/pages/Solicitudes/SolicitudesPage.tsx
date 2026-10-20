@@ -34,7 +34,7 @@ export default function SolicitudesPage() {
     ubicacion_destino_id: '' // Nuevo campo para traslados
   });
 
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || '';
 
   useEffect(() => {
     const cargarDatos = async () => {
