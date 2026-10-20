@@ -13,27 +13,25 @@ import solicitudRoutes from './src/routes/solicitud.routes.js';
 const app = express();
 
 const allowedOrigins = [
-    process.env.FRONTEND_URL, 
-   "http://192.168.56.1:8080",
-    "http://localhost:8080", 
-    "http://localhost:5173",
-    "http://192.168.0.13:8081" 
+  'http://34.176.181.10:8080'      // IP interna de slep-erp-server
 ].filter(Boolean);
 
-app.use(
-    cors({
-        origin: function (origin, callback) {
-            if (!origin || allowedOrigins.includes(origin)) {
-                callback(null, true);
-            } else {
-                callback(new Error("Origen no permitido por CORS"));
-            }
-        },
-        methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-        allowedHeaders: ["Content-Type", "Authorization", "x-access-token"],
-    })
-);
+app.use(cors({
+  origin: function (origin, callback) {
+    // 1. Permite peticiones sin origen (same-origin policy del navegador)
+    if (!origin) return callback(null, true);
 
+    // 2. Valida estrictamente contra la lista blanca
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    // 3. Bloqueo estricto con registro de auditoría
+    console.error(`[SEGURIDAD] CORS Bloqueado. Origen recibido: '${origin}'`);
+    return callback(new Error('Origen no permitido por CORS'));
+  },
+  credentials: true 
+}));
 app.use(express.json());
 
 const uploadDir = path.resolve(process.cwd(), "uploads");
